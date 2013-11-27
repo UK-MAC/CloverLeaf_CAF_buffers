@@ -540,13 +540,13 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
     IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
       left_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left)
       receiver=chunks(left_neighbour_chunk)%task
-      chunks(left_neighbour_chunk)[receiver+1]%right_rcv_buffer = left_snd_buffer
+      chunks(left_neighbour_chunk)[receiver+1]%right_rcv_buffer(1:size) = left_snd_buffer(1:size)
     ENDIF
 
     IF(chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
       right_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right)
       receiver = chunks(right_neighbour_chunk)%task
-      chunks(right_neighbour_chunk)[receiver+1]%left_rcv_buffer = right_snd_buffer
+      chunks(right_neighbour_chunk)[receiver+1]%left_rcv_buffer(1:size) = right_snd_buffer(1:size)
     ENDIF
   ENDIF
 
@@ -583,13 +583,13 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
     IF(chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
       bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_bottom)
       receiver=chunks(bottom_neighbour_chunk)%task
-      chunks(bottom_neighbour_chunk)[receiver+1]%top_rcv_buffer = bottom_snd_buffer
+      chunks(bottom_neighbour_chunk)[receiver+1]%top_rcv_buffer(1:size) = bottom_snd_buffer(1:size)
     ENDIF
 
     IF(chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
       top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_top)
       receiver=chunks(top_neighbour_chunk)%task
-      chunks(top_neighbour_chunk)[receiver+1]%bottom_rcv_buffer = top_snd_buffer
+      chunks(top_neighbour_chunk)[receiver+1]%bottom_rcv_buffer(1:size) = top_snd_buffer(1:size)
     ENDIF
   ENDIF
 
