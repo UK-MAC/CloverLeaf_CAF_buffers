@@ -475,6 +475,8 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
                                    top_rcv_buffer,                         &
                                    depth,field_type)
 
+  USE pack_kernel_module
+
   IMPLICIT NONE
 
   REAL(KIND=8) :: field(-1:,-1:) ! This seems to work for any type of mesh data
@@ -525,27 +527,35 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
   ! Pack real data into buffers
   IF(parallel%task.EQ.chunks(chunk)%task) THEN
+    size=(1+(chunks(chunk)%field%y_max+y_inc+depth)-(chunks(chunk)%field%y_min-depth))*depth
+
+    CALL pack_left_right_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
+                                 chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
+                                 chunks(chunk)%chunk_neighbours(chunk_left),          &
+                                 chunks(chunk)%chunk_neighbours(chunk_right),         &
+                                 external_face,                                       &
+                                 x_inc,y_inc,depth,size,                              &
+                                 field,left_snd_buffer,right_snd_buffer)
+
     IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-      size=(1+(chunks(chunk)%field%y_max+y_inc+depth)-(chunks(chunk)%field%y_min-depth))*depth
-      DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
-        DO j=1,depth
-          index=j+(k+depth-1)*depth
-          left_snd_buffer(index)=field(chunks(chunk)%field%x_min+x_inc-1+j,k)
-        ENDDO
-      ENDDO
+      !DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
+      !  DO j=1,depth
+      !    index=j+(k+depth-1)*depth
+      !    left_snd_buffer(index)=field(chunks(chunk)%field%x_min+x_inc-1+j,k)
+      !  ENDDO
+      !ENDDO
       left_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left)
       receiver=chunks(left_neighbour_chunk)%task
       chunks(left_neighbour_chunk)[receiver+1]%right_rcv_buffer = left_snd_buffer
     ENDIF
 
     IF(chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-      size=(1+(chunks(chunk)%field%y_max+y_inc+depth)-(chunks(chunk)%field%y_min-depth))*depth
-      DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
-        DO j=1,depth
-          index=j+(k+depth-1)*depth
-          right_snd_buffer(index)=field(chunks(chunk)%field%x_max+1-j,k)
-        ENDDO
-      ENDDO
+      !DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
+      !  DO j=1,depth
+      !    index=j+(k+depth-1)*depth
+      !    right_snd_buffer(index)=field(chunks(chunk)%field%x_max+1-j,k)
+      !  ENDDO
+      !ENDDO
       right_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right)
       receiver = chunks(right_neighbour_chunk)%task
       chunks(right_neighbour_chunk)[receiver+1]%left_rcv_buffer = right_snd_buffer
@@ -562,46 +572,62 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
   ! Unpack buffers in halo cells
   IF(parallel%task.EQ.chunks(chunk)%task) THEN
-    IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-      DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
-        DO j=1,depth
-          index=j+(k+depth-1)*depth
-          field(chunks(chunk)%field%x_min-j,k)=left_rcv_buffer(index)
-        ENDDO
-      ENDDO
-    ENDIF
-    IF(chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-      DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
-        DO j=1,depth
-          index=j+(k+depth-1)*depth
-          field(chunks(chunk)%field%x_max+x_inc+j,k)=right_rcv_buffer(index)
-        ENDDO
-      ENDDO
-    ENDIF
+      CALL unpack_left_right_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
+                                     chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
+                                     chunks(chunk)%chunk_neighbours(chunk_left),          &
+                                     chunks(chunk)%chunk_neighbours(chunk_right),         &
+                                     external_face,                                       &
+                                     x_inc,y_inc,depth,size,                              &
+                                     field,left_rcv_buffer,right_rcv_buffer)
+
+    !IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
+    !  DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
+    !    DO j=1,depth
+    !      index=j+(k+depth-1)*depth
+    !      field(chunks(chunk)%field%x_min-j,k)=left_rcv_buffer(index)
+    !    ENDDO
+    !  ENDDO
+    !ENDIF
+    !IF(chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
+    !  DO k=chunks(chunk)%field%y_min-depth,chunks(chunk)%field%y_max+y_inc+depth
+    !    DO j=1,depth
+    !      index=j+(k+depth-1)*depth
+    !      field(chunks(chunk)%field%x_max+x_inc+j,k)=right_rcv_buffer(index)
+    !    ENDDO
+    !  ENDDO
+    !ENDIF
   ENDIF
 
   IF(parallel%task.EQ.chunks(chunk)%task) THEN
+    size=(1+(chunks(chunk)%field%x_max+x_inc+depth)-(chunks(chunk)%field%x_min-depth))*depth
+
+    CALL pack_top_bottom_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
+                                 chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
+                                 chunks(chunk)%chunk_neighbours(chunk_bottom),        &
+                                 chunks(chunk)%chunk_neighbours(chunk_top),           &
+                                 external_face,                                       &
+                                 x_inc,y_inc,depth,size,                              &
+                                 field,bottom_snd_buffer,top_snd_buffer)
+
     IF(chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-      size=(1+(chunks(chunk)%field%x_max+x_inc+depth)-(chunks(chunk)%field%x_min-depth))*depth
-      DO k=1,depth
-        DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
-          index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
-          bottom_snd_buffer(index)=field(j,chunks(chunk)%field%y_min+y_inc-1+k)
-        ENDDO
-      ENDDO
+      !DO k=1,depth
+      !  DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
+      !    index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
+      !    bottom_snd_buffer(index)=field(j,chunks(chunk)%field%y_min+y_inc-1+k)
+      !  ENDDO
+      !ENDDO
       bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_bottom)
       receiver=chunks(bottom_neighbour_chunk)%task
       chunks(bottom_neighbour_chunk)[receiver+1]%top_rcv_buffer = bottom_snd_buffer
     ENDIF
 
     IF(chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-      size=(1+(chunks(chunk)%field%x_max+x_inc+depth)-(chunks(chunk)%field%x_min-depth))*depth
-      DO k=1,depth
-        DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
-          index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
-          top_snd_buffer(index)=field(j,chunks(chunk)%field%y_max+1-k)
-        ENDDO
-      ENDDO
+      !DO k=1,depth
+      !  DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
+      !    index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
+      !    top_snd_buffer(index)=field(j,chunks(chunk)%field%y_max+1-k)
+      !  ENDDO
+      !ENDDO
       top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_top)
       receiver=chunks(top_neighbour_chunk)%task
       chunks(top_neighbour_chunk)[receiver+1]%bottom_rcv_buffer = top_snd_buffer
@@ -617,22 +643,31 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
   ! Unpack buffers in halo cells
   IF(parallel%task.EQ.chunks(chunk)%task) THEN
-    IF(chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-      DO k=1,depth
-        DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
-          index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
-          field(j,chunks(chunk)%field%y_min-k)=bottom_rcv_buffer(index)
-        ENDDO
-      ENDDO
-    ENDIF
-    IF(chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-      DO k=1,depth
-        DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
-          index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
-          field(j,chunks(chunk)%field%y_max+y_inc+k)=top_rcv_buffer(index)
-        ENDDO
-      ENDDO
-    ENDIF
+
+    CALL unpack_top_bottom_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
+                                   chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
+                                   chunks(chunk)%chunk_neighbours(chunk_bottom),        &
+                                   chunks(chunk)%chunk_neighbours(chunk_top),           &
+                                   external_face,                                       &
+                                   x_inc,y_inc,depth,size,                              &
+                                   field,bottom_rcv_buffer,top_rcv_buffer)
+
+    !IF(chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
+    !  DO k=1,depth
+    !    DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
+    !      index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
+    !      field(j,chunks(chunk)%field%y_min-k)=bottom_rcv_buffer(index)
+    !    ENDDO
+    !  ENDDO
+    !ENDIF
+    !IF(chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
+    !  DO k=1,depth
+    !    DO j=chunks(chunk)%field%x_min-depth,chunks(chunk)%field%x_max+x_inc+depth
+    !      index=j+depth+(k-1)*(chunks(chunk)%field%x_max+x_inc+(2*depth))
+    !      field(j,chunks(chunk)%field%y_max+y_inc+k)=top_rcv_buffer(index)
+    !    ENDDO
+    !  ENDDO
+    !ENDIF
   ENDIF
 
 END SUBROUTINE clover_exchange_message

@@ -134,6 +134,7 @@ clover_leaf: c_lover *.f90 Makefile
 	$(MPI_COMPILER) $(FLAGS)	\
 	data.f90			\
 	definitions.f90			\
+    pack_kernel.f90         \
 	clover.f90			\
 	report.f90			\
 	timer.f90			\
