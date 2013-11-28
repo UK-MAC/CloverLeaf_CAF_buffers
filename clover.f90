@@ -879,6 +879,13 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
             CALL unpack_left_bottom_buffer_seq(chunk, depth, x_inc, y_inc, left_bottom_rcv_buffer, field)
         ENDIF
 
+
+        ! Wait for the messages
+#ifdef LOCAL_SYNC
+        sync images( chunks(chunk)%imageNeighbours )
+#else
+        sync all
+#endif
         ! Unpack buffers in halo cells
         !IF(parallel%task.EQ.chunks(chunk)%task) THEN
         !    CALL unpack_left_right_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
