@@ -150,7 +150,7 @@ MODULE definitions_module
 
      INTEGER         :: task   !caf task minus 1
 
-     INTEGER         :: chunk_neighbours(4) ! Chunks, not tasks, so we can overload in the future
+     INTEGER         :: chunk_neighbours(8) ! Chunks, not tasks, so we can overload in the future
 
      ! Idealy, create an array to hold the buffers for each field so a commuincation only needs
      !  one send and one receive per face, rather than per field.
@@ -158,6 +158,9 @@ MODULE definitions_module
      !  rather than a chunk to chunk comm. See how performance is at high core counts before deciding
      REAL(KIND=8),ALLOCATABLE:: left_rcv_buffer(:),right_rcv_buffer(:),bottom_rcv_buffer(:),top_rcv_buffer(:)
      REAL(KIND=8),ALLOCATABLE:: left_snd_buffer(:),right_snd_buffer(:),bottom_snd_buffer(:),top_snd_buffer(:)
+
+     REAL(KIND=8),ALLOCATABLE:: left_top_rcv_buffer(:),right_top_rcv_buffer(:),right_bottom_rcv_buffer(:),left_bottom_rcv_buffer(:)
+     REAL(KIND=8),ALLOCATABLE:: left_top_snd_buffer(:),right_top_snd_buffer(:),right_bottom_snd_buffer(:),left_bottom_snd_buffer(:)
 #ifdef LOCAL_SYNC
      INTEGER, ALLOCATABLE:: imageNeighbours(:)
 #endif

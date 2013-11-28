@@ -35,10 +35,14 @@ MODULE data_module
                              ,g_ydir=2
 
    ! These two need to be kept consistent with update_halo
-   INTEGER,      PARAMETER :: CHUNK_LEFT   =1    &
-                             ,CHUNK_RIGHT  =2    &
-                             ,CHUNK_BOTTOM =3    &
-                             ,CHUNK_TOP    =4    &
+   INTEGER,      PARAMETER :: CHUNK_LEFT   =1         &
+                             ,CHUNK_RIGHT  =2         &
+                             ,CHUNK_BOTTOM =3         &
+                             ,CHUNK_TOP    =4         &
+                             ,CHUNK_LEFT_TOP    =5    &
+                             ,CHUNK_LEFT_BOTTOM =6    &
+                             ,CHUNK_RIGHT_TOP   =7    &
+                             ,CHUNK_RIGHT_BOTTOM=8    &
                              ,EXTERNAL_FACE=-1
 
    INTEGER,         PARAMETER :: FIELD_DENSITY0   = 1         &
