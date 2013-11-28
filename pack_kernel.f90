@@ -208,13 +208,30 @@ END SUBROUTINE pack_left_bottom_buffer_seq
 
 
 !new unpack routines
-SUBROUTINE unpack_left_buffer_seq(chunk, depth, x_inc, y_inc, left_rcv_buffer, field)
+SUBROUTINE unpack_left_buffer_seq(chunk, depth, field_type, left_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, topedge, bottomedge, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, topedge, bottomedge, j, k, field_type
     REAL(KIND=8) :: left_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     topedge = 0
@@ -236,13 +253,30 @@ SUBROUTINE unpack_left_buffer_seq(chunk, depth, x_inc, y_inc, left_rcv_buffer, f
 END SUBROUTINE unpack_left_buffer_seq
 
 
-SUBROUTINE unpack_right_buffer_seq(chunk, depth, x_inc, y_inc, right_rcv_buffer, field)
+SUBROUTINE unpack_right_buffer_seq(chunk, depth, field_type, right_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, topedge, bottomedge, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, topedge, bottomedge, j, k, field_type
     REAL(KIND=8) :: right_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     topedge = 0
@@ -264,13 +298,30 @@ SUBROUTINE unpack_right_buffer_seq(chunk, depth, x_inc, y_inc, right_rcv_buffer,
 END SUBROUTINE unpack_right_buffer_seq
 
 
-SUBROUTINE unpack_bottom_buffer_seq(chunk, depth, x_inc, y_inc, bottom_rcv_buffer, field)
+SUBROUTINE unpack_bottom_buffer_seq(chunk, depth, field_type, bottom_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, leftedge, rightedge, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, leftedge, rightedge, j, k, field_type
     REAL(KIND=8) :: bottom_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     leftedge = 0
@@ -292,13 +343,30 @@ SUBROUTINE unpack_bottom_buffer_seq(chunk, depth, x_inc, y_inc, bottom_rcv_buffe
 END SUBROUTINE unpack_bottom_buffer_seq
 
 
-SUBROUTINE unpack_top_buffer_seq(chunk, depth, x_inc, y_inc, top_rcv_buffer, field)
+SUBROUTINE unpack_top_buffer_seq(chunk, depth, field_type, top_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, leftedge, rightedge, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, leftedge, rightedge, j, k, field_type
     REAL(KIND=8) :: top_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     leftedge = 0
@@ -320,13 +388,30 @@ SUBROUTINE unpack_top_buffer_seq(chunk, depth, x_inc, y_inc, top_rcv_buffer, fie
 END SUBROUTINE unpack_top_buffer_seq
 
 
-SUBROUTINE unpack_left_top_buffer_seq(chunk, depth, x_inc, y_inc, left_top_rcv_buffer, field)
+SUBROUTINE unpack_left_top_buffer_seq(chunk, depth, field_type, left_top_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k, field_type
     REAL(KIND=8) :: left_top_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     DO k=1,depth
@@ -338,13 +423,30 @@ SUBROUTINE unpack_left_top_buffer_seq(chunk, depth, x_inc, y_inc, left_top_rcv_b
 
 END SUBROUTINE unpack_left_top_buffer_seq
 
-SUBROUTINE unpack_right_top_buffer_seq(chunk, depth, x_inc, y_inc, right_top_rcv_buffer, field)
+SUBROUTINE unpack_right_top_buffer_seq(chunk, depth, field_type, right_top_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k, field_type
     REAL(KIND=8) :: right_top_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     DO k=1,depth
@@ -356,13 +458,30 @@ SUBROUTINE unpack_right_top_buffer_seq(chunk, depth, x_inc, y_inc, right_top_rcv
 
 END SUBROUTINE unpack_right_top_buffer_seq
 
-SUBROUTINE unpack_right_bottom_buffer_seq(chunk, depth, x_inc, y_inc, right_bottom_rcv_buffer, field)
+SUBROUTINE unpack_right_bottom_buffer_seq(chunk, depth, field_type, right_bottom_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k, field_type
     REAL(KIND=8) :: right_bottom_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     DO k=1,depth
@@ -374,13 +493,30 @@ SUBROUTINE unpack_right_bottom_buffer_seq(chunk, depth, x_inc, y_inc, right_bott
 
 END SUBROUTINE unpack_right_bottom_buffer_seq
 
-SUBROUTINE unpack_left_bottom_buffer_seq(chunk, depth, x_inc, y_inc, left_bottom_rcv_buffer, field)
+SUBROUTINE unpack_left_bottom_buffer_seq(chunk, depth, field_type, left_bottom_rcv_buffer, field)
 
     IMPLICIT NONE
 
-    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k
+    INTEGER :: chunk, depth, x_inc, y_inc, index, j, k, field_type
     REAL(KIND=8) :: left_bottom_rcv_buffer(:)
     REAL(KIND=8) :: field(-1:,-1:)
+
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     index = 1
     DO k=1,depth
