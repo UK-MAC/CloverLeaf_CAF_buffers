@@ -53,23 +53,24 @@ SUBROUTINE timestep()
   dt    = g_big
   small=0
 
-  DO c = 1, number_of_chunks
-    CALL ideal_gas(c,.FALSE.)
-  END DO
-
   fields=0
   fields(FIELD_PRESSURE)=1
   fields(FIELD_ENERGY0)=1
   fields(FIELD_DENSITY0)=1
   fields(FIELD_XVEL0)=1
   fields(FIELD_YVEL0)=1
-  CALL update_halo(fields,1)
+
+  DO c = 1, number_of_chunks
+    CALL ideal_gas(c,.FALSE.,fields,1,.TRUE.)
+  END DO
+
+  CALL update_halo(fields,1,.FALSE.)
 
   CALL viscosity()
 
   fields=0
   fields(FIELD_VISCOSITY)=1
-  CALL update_halo(fields,1)
+  CALL update_halo(fields,1,.TRUE.)
 
   DO c = 1, number_of_chunks
     CALL calc_dt(c,dtlp,dtl_control,xl_pos,yl_pos,jldt,kldt)

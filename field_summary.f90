@@ -37,7 +37,7 @@ SUBROUTINE field_summary()
 
 !$ INTEGER :: OMP_GET_THREAD_NUM
 
-  INTEGER      :: c
+  INTEGER      :: c, fields(NUM_FIELDS)
 
   IF(parallel%boss)THEN
     WRITE(g_out,*)
@@ -45,8 +45,9 @@ SUBROUTINE field_summary()
     WRITE(g_out,'(a13,7a16)')'           ','Volume','Mass','Density','Pressure','Internal Energy','Kinetic Energy','Total Energy'
   ENDIF
 
+  fields=0
   DO c=1,number_of_chunks
-    CALL ideal_gas(c,.FALSE.)
+    CALL ideal_gas(c,.FALSE.,fields,1,.FALSE.)
   ENDDO
 
   DO c=1,number_of_chunks

@@ -108,12 +108,14 @@ SUBROUTINE PdV(predict)
   ENDIF
 
   IF(predict)THEN
-    DO c=1,number_of_chunks
-      CALL ideal_gas(c,.TRUE.)
-    ENDDO
     fields=0
     fields(FIELD_PRESSURE)=1
-    CALL update_halo(fields,1)
+
+    DO c=1,number_of_chunks
+      CALL ideal_gas(c,.TRUE.,fields,1,.TRUE.)
+    ENDDO
+
+    CALL update_halo(fields,1,.FALSE.)
   ENDIF
 
   IF ( predict ) THEN

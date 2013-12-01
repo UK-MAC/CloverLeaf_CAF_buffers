@@ -58,15 +58,16 @@ SUBROUTINE visit
 
   ENDIF
 
-  DO c=1,number_of_chunks
-    CALL ideal_gas(c,.FALSE.)
-  ENDDO
-
   fields=0
   fields(FIELD_PRESSURE)=1
   fields(FIELD_XVEL0)=1
   fields(FIELD_YVEL0)=1
-  CALL update_halo(fields,1)
+
+  DO c=1,number_of_chunks
+    CALL ideal_gas(c,.FALSE.,fields,1,.TRUE.)
+  ENDDO
+
+  CALL update_halo(fields,1,.FALSE.)
 
   CALL viscosity()
 

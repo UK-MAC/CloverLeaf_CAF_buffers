@@ -49,7 +49,7 @@ SUBROUTINE advection()
   fields(FIELD_DENSITY1)=1
   fields(FIELD_VOL_FLUX_X)=1
   fields(FIELD_VOL_FLUX_Y)=1
-  CALL update_halo(fields,2)
+  CALL update_halo(fields,2,.TRUE.)
 
   DO c=1,number_of_chunks
     CALL advec_cell_driver(c,sweep_number,direction)
@@ -62,7 +62,7 @@ SUBROUTINE advection()
   fields(FIELD_YVEL1)=1
   fields(FIELD_MASS_FLUX_X)=1
   fields(FIELD_MASS_FLUX_y)=1
-  CALL update_halo(fields,2)
+  CALL update_halo(fields,2,.TRUE.)
 
   DO c=1,number_of_chunks
     CALL advec_mom_driver(c,xvel,direction,sweep_number) 
@@ -86,7 +86,7 @@ SUBROUTINE advection()
   fields(FIELD_YVEL1)=1
   fields(FIELD_MASS_FLUX_X)=1
   fields(FIELD_MASS_FLUX_y)=1
-  CALL update_halo(fields,2)
+  CALL update_halo(fields,2,.TRUE.)
 
   DO c=1,number_of_chunks
     CALL advec_mom_driver(c,xvel,direction,sweep_number) 

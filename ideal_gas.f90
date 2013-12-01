@@ -24,16 +24,16 @@ MODULE ideal_gas_module
 
 CONTAINS
 
-SUBROUTINE ideal_gas(chunk,predict)
+SUBROUTINE ideal_gas(chunk,predict,fields,depth,exchange)
 
   USE clover_module
   USE ideal_gas_kernel_module
 
   IMPLICIT NONE
 
-  INTEGER :: chunk
+  INTEGER :: chunk, fields(:), depth
 
-  LOGICAl :: predict
+  LOGICAl :: predict,exchange
 
   IF(chunks(chunk)%task .EQ. parallel%task) THEN
 
@@ -46,7 +46,8 @@ SUBROUTINE ideal_gas(chunk,predict)
                             chunks(chunk)%field%density0,   &
                             chunks(chunk)%field%energy0,    &
                             chunks(chunk)%field%pressure,   &
-                            chunks(chunk)%field%soundspeed  )
+                            chunks(chunk)%field%soundspeed, &
+                            fields, depth, exchange         )
       ELSEIF(use_C_kernels)THEN
         CALL ideal_gas_kernel_c(chunks(chunk)%field%x_min,  &
                             chunks(chunk)%field%x_max,      &
@@ -66,7 +67,8 @@ SUBROUTINE ideal_gas(chunk,predict)
                             chunks(chunk)%field%density1,   &
                             chunks(chunk)%field%energy1,    &
                             chunks(chunk)%field%pressure,   &
-                            chunks(chunk)%field%soundspeed  )
+                            chunks(chunk)%field%soundspeed, &
+                            fields, depth, exchange         )
       ELSEIF(use_C_kernels)THEN
         CALL ideal_gas_kernel_c(chunks(chunk)%field%x_min,  &
                             chunks(chunk)%field%x_max,      &
