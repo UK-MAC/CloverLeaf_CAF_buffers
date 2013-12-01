@@ -63,6 +63,12 @@ SUBROUTINE viscosity_kernel(x_min,x_max,y_min,y_max,    &
         ! compute remaining cells in the centre, overlapping with comms
         CALL viscosity_kernel_real(x_min+depth,x_max-depth,y_min+depth,y_max-depth,x_min,x_max,y_min,y_max,viscosity,xvel0,yvel0,celldx,celldy,pressure,density0)
 
+#ifdef LOCAL_SYNC
+        sync images( chunks(parallel%task+1)%imageNeighbours )
+#else
+        sync all
+#endif
+
         !call method in clover to do to waitall and unpack the buffers, could prepost the buffers at some point
         CALL clover_exchange_receive_async(depth, fields)
 

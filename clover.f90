@@ -604,13 +604,6 @@ SUBROUTINE clover_exchange_send_async(depth, fields)
         CALL clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
     ENDIF
 
-    ! Wait for the messages
-#ifdef LOCAL_SYNC
-    sync images( chunks(chunk)%imageNeighbours )
-#else
-    sync all
-#endif
-
 END SUBROUTINE clover_exchange_send_async
 
 

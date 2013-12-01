@@ -72,6 +72,12 @@ SUBROUTINE flux_calc_kernel(x_min,x_max,y_min,y_max,dt,              &
     CALL real_vol_flux_x(x_min+depth, x_max-depth, y_min+depth, y_max-depth, x_min, x_max, y_min, y_max, dt, vol_flux_x, xarea, xvel0, xvel1)
     CALL real_vol_flux_y(x_min+depth, x_max-depth, y_min+depth, y_max-depth, x_min, x_max, y_min, y_max, dt, vol_flux_y, yarea, yvel0, yvel1)
 
+#ifdef LOCAL_SYNC
+    sync images( chunks(parallel%task+1)%imageNeighbours )
+#else
+    sync all
+#endif
+
     !call method in clover to do to waitall and unpack the buffers, could prepost the buffers at some point
     CALL clover_exchange_receive_async(depth, fields)
 

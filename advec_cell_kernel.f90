@@ -121,6 +121,12 @@ SUBROUTINE advec_cell_kernel(x_min,       &
         CALL xdir_loopblock3(x_min+depth  , x_max-depth  , y_min+depth, y_max-depth, x_min, x_max, y_min, y_max,                        &
                              density1, energy1, vol_flux_x, mass_flux_x, pre_vol, pre_mass, post_mass, advec_vol, post_ener, ener_flux)
 
+#ifdef LOCAL_SYNC
+        sync images( chunks(parallel%task+1)%imageNeighbours )
+#else
+        sync all
+#endif
+
         !execite WAITALL and unpack receives
         CALL clover_exchange_receive_async(depth, fields)
 
@@ -161,6 +167,11 @@ SUBROUTINE advec_cell_kernel(x_min,       &
         CALL ydir_loopblock3(x_min+depth, x_max-depth, y_min+depth  , y_max-depth  , x_min, x_max, y_min, y_max,                        &
                              density1, energy1, vol_flux_y, mass_flux_y, pre_vol, post_vol, pre_mass, post_mass, advec_vol, post_ener, ener_flux)
 
+#ifdef LOCAL_SYNC
+        sync images( chunks(parallel%task+1)%imageNeighbours )
+#else
+        sync all
+#endif
 
         !execute WAITALL and unpack receives
         CALL clover_exchange_receive_async(depth, fields)
