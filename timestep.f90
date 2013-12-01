@@ -66,11 +66,11 @@ SUBROUTINE timestep()
 
   CALL update_halo(fields,1,.FALSE.)
 
-  CALL viscosity()
-
   fields=0
   fields(FIELD_VISCOSITY)=1
-  CALL update_halo(fields,1,.TRUE.)
+  CALL viscosity(fields,1,.TRUE.)
+
+  CALL update_halo(fields,1,.FALSE.)
 
   DO c = 1, number_of_chunks
     CALL calc_dt(c,dtlp,dtl_control,xl_pos,yl_pos,jldt,kldt)

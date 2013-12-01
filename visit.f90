@@ -69,7 +69,7 @@ SUBROUTINE visit
 
   CALL update_halo(fields,1,.FALSE.)
 
-  CALL viscosity()
+  CALL viscosity(fields,1,.FALSE.)
 
   IF ( parallel%boss ) THEN
 

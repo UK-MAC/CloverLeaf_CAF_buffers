@@ -24,14 +24,15 @@ MODULE viscosity_module
 
 CONTAINS
 
-SUBROUTINE viscosity()
+SUBROUTINE viscosity(fields, depth, exchange)
 
   USE clover_module
   USE viscosity_kernel_module
   
   IMPLICIT NONE
 
-  INTEGER :: c
+  INTEGER :: c, fields(:), depth
+  LOGICAL :: exchange
 
   DO c=1,number_of_chunks
 
@@ -48,7 +49,8 @@ SUBROUTINE viscosity()
                             chunks(c)%field%pressure,                  &
                             chunks(c)%field%viscosity,                 &
                             chunks(c)%field%xvel0,                     &
-                            chunks(c)%field%yvel0                      )
+                            chunks(c)%field%yvel0,                     &
+                            fields, depth, exchange                    )
       ELSEIF(use_C_kernels)THEN
         CALL viscosity_kernel_c(chunks(c)%field%x_min,                 &
                             chunks(c)%field%x_max,                     &
