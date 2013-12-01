@@ -51,10 +51,6 @@ SUBROUTINE advection()
   fields(FIELD_VOL_FLUX_Y)=1
   CALL update_halo(fields,2,.FALSE.)
 
-  DO c=1,number_of_chunks
-    CALL advec_cell_driver(c,sweep_number,direction)
-  ENDDO
-
   fields=0
   fields(FIELD_DENSITY1)=1
   fields(FIELD_ENERGY1)=1
@@ -62,7 +58,11 @@ SUBROUTINE advection()
   fields(FIELD_YVEL1)=1
   fields(FIELD_MASS_FLUX_X)=1
   fields(FIELD_MASS_FLUX_y)=1
-  CALL update_halo(fields,2,.TRUE.)
+  DO c=1,number_of_chunks
+    CALL advec_cell_driver(c,sweep_number,direction,fields,2,.TRUE.)
+  ENDDO
+
+  CALL update_halo(fields,2,.FALSE.)
 
   DO c=1,number_of_chunks
     CALL advec_mom_driver(c,xvel,direction,sweep_number) 
@@ -75,10 +75,6 @@ SUBROUTINE advection()
   IF(advect_x)      direction=g_ydir
   IF(.not.advect_x) direction=g_xdir
 
-  DO c=1,number_of_chunks
-    CALL advec_cell_driver(c,sweep_number,direction)
-  ENDDO
-
   fields=0
   fields(FIELD_DENSITY1)=1
   fields(FIELD_ENERGY1)=1
@@ -86,7 +82,11 @@ SUBROUTINE advection()
   fields(FIELD_YVEL1)=1
   fields(FIELD_MASS_FLUX_X)=1
   fields(FIELD_MASS_FLUX_y)=1
-  CALL update_halo(fields,2,.TRUE.)
+  DO c=1,number_of_chunks
+    CALL advec_cell_driver(c,sweep_number,direction,fields,2,.TRUE.)
+  ENDDO
+
+  CALL update_halo(fields,2,.FALSE.)
 
   DO c=1,number_of_chunks
     CALL advec_mom_driver(c,xvel,direction,sweep_number) 
