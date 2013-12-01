@@ -30,8 +30,17 @@ SUBROUTINE flux_calc()
 
   IMPLICIT NONE
 
-  INTEGER :: c
+  INTEGER :: c, fields(NUM_FIELDS)
 
+  REAL(KIND=8) :: kernel_time,timer
+
+  fields=0
+  fields(FIELD_ENERGY1)=1
+  fields(FIELD_DENSITY1)=1
+  fields(FIELD_VOL_FLUX_X)=1
+  fields(FIELD_VOL_FLUX_Y)=1
+
+  !IF(profiler_on) kernel_time=timer()
   DO c=1,number_of_chunks
 
     IF(chunks(c)%task.EQ.parallel%task) THEN
@@ -49,7 +58,8 @@ SUBROUTINE flux_calc()
                             chunks(c)%field%xvel1,           &
                             chunks(c)%field%yvel1,           &
                             chunks(c)%field%vol_flux_x,      &
-                            chunks(c)%field%vol_flux_y       )
+                            chunks(c)%field%vol_flux_y,      &
+                            fields,2,.TRUE.                  )
       ELSEIF(use_C_kernels)THEN
         CALL flux_calc_kernel_c(chunks(c)%field%x_min,       &
                             chunks(c)%field%x_max,           &
@@ -69,6 +79,7 @@ SUBROUTINE flux_calc()
     ENDIF
 
   ENDDO
+  !IF(profiler_on) profiler%flux=profiler%flux+(timer()-kernel_time)
 
 END SUBROUTINE flux_calc
 

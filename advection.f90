@@ -49,7 +49,7 @@ SUBROUTINE advection()
   fields(FIELD_DENSITY1)=1
   fields(FIELD_VOL_FLUX_X)=1
   fields(FIELD_VOL_FLUX_Y)=1
-  CALL update_halo(fields,2,.TRUE.)
+  CALL update_halo(fields,2,.FALSE.)
 
   DO c=1,number_of_chunks
     CALL advec_cell_driver(c,sweep_number,direction)
