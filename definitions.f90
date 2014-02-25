@@ -184,6 +184,8 @@ MODULE definitions_module
 
   END TYPE chunk_type
 
+  REAL(KIND=8),ALLOCATABLE    :: totals(:)[:]
+
 
   TYPE(chunk_type),  ALLOCATABLE       :: chunks(:)[:]
   INTEGER                              :: number_of_chunks

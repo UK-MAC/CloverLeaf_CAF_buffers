@@ -714,17 +714,17 @@ END SUBROUTINE clover_max
 
 SUBROUTINE clover_allgather(value,values)
 
-  IMPLICIT NONE
+    IMPLICIT NONE
 
-  REAL(KIND=8) :: value
+    REAL(KIND=8) :: value
 
-  REAL(KIND=8) :: values(parallel%max_task)
+    REAL(KIND=8) :: values(parallel%max_task)
 
-  INTEGER :: err
+    INTEGER :: err
 
-  values(1)=value ! Just to ensure it will work in serial
+    values(1)=value ! Just to ensure it will work in serial
 
-  CALL MPI_ALLGATHER(value,1,MPI_DOUBLE_PRECISION,values,1,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,err)
+    totals(parallel%image)[1] = value
 
 END SUBROUTINE clover_allgather
 

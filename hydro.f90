@@ -39,7 +39,7 @@ SUBROUTINE hydro
   REAL(KIND=8)    :: grind_time,cells,rstep
   REAL(KIND=8)    :: step_time,step_grind
   REAL(KIND=8)    :: first_step,second_step
-  REAL(KIND=8)    :: kernel_total,totals(parallel%max_task)
+  REAL(KIND=8)    :: kernel_total!,totals(parallel%max_task)
 
   timerstart = timer()
 
@@ -109,36 +109,76 @@ SUBROUTINE hydro
                     +profiler%mom_advection+profiler%reset+profiler%halo_exchange+profiler%summary &
                     +profiler%visit
         CALL clover_allgather(kernel_total,totals)
+        CALL clover_barrier
         ! So then what I do is use the individual kernel times for the
         ! maximum kernel time task for the profile print
-        loc=MAXLOC(totals)
-        kernel_total=totals(loc(1))
+        IF ( parallel%boss ) loc=MAXLOC(totals)
+        IF ( parallel%boss ) kernel_total=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%timestep,totals)
-        profiler%timestep=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%timestep=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%ideal_gas,totals)
-        profiler%ideal_gas=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%ideal_gas=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%viscosity,totals)
-        profiler%viscosity=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%viscosity=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%PdV,totals)
-        profiler%PdV=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%PdV=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%revert,totals)
-        profiler%revert=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%revert=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%acceleration,totals)
-        profiler%acceleration=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%acceleration=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%flux,totals)
-        profiler%flux=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%flux=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%cell_advection,totals)
-        profiler%cell_advection=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%cell_advection=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%mom_advection,totals)
-        profiler%mom_advection=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%mom_advection=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%reset,totals)
-        profiler%reset=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%reset=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%halo_exchange,totals)
-        profiler%halo_exchange=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%halo_exchange=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%summary,totals)
-        profiler%summary=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%summary=totals(loc(1))
+
+        CALL clover_barrier
         CALL clover_allgather(profiler%visit,totals)
-        profiler%visit=totals(loc(1))
+        CALL clover_barrier
+        IF ( parallel%boss ) profiler%visit=totals(loc(1))
 
         IF ( parallel%boss ) THEN
           WRITE(g_out,*)

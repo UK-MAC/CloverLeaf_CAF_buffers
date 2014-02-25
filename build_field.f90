@@ -138,4 +138,8 @@ SUBROUTINE build_field(chunk,x_cells,y_cells)
    chunks(chunk)%field%xarea=0.0
    chunks(chunk)%field%yarea=0.0
   
+    IF ( profiler_on ) THEN
+        ALLOCATE(totals(parallel%max_task)[*])
+    ENDIF
+
 END SUBROUTINE build_field
