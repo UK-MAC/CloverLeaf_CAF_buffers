@@ -669,59 +669,44 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
                                    left_bottom_rcv_buffer,                 &
                                    depth,field_type)
 
+    !USE pack_kernel_module
 
-  IMPLICIT NONE
+    IMPLICIT NONE
 
-  REAL(KIND=8) :: field(-1:,-1:) ! This seems to work for any type of mesh data
-  REAL(KIND=8) :: left_snd_buffer(:),left_rcv_buffer(:),right_snd_buffer(:),right_rcv_buffer(:)
-  REAL(KIND=8) :: bottom_snd_buffer(:),bottom_rcv_buffer(:),top_snd_buffer(:),top_rcv_buffer(:)
+    REAL(KIND=8) :: field(-1:,-1:) ! This seems to work for any type of mesh data
 
-  REAL(KIND=8) :: left_top_snd_buffer(:),left_top_rcv_buffer(:),right_top_snd_buffer(:),right_top_rcv_buffer(:)
-  REAL(KIND=8) :: right_bottom_snd_buffer(:),right_bottom_rcv_buffer(:),left_bottom_snd_buffer(:),left_bottom_rcv_buffer(:)
+    REAL(KIND=8) :: left_snd_buffer(:),left_rcv_buffer(:),right_snd_buffer(:),right_rcv_buffer(:)
+    REAL(KIND=8) :: bottom_snd_buffer(:),bottom_rcv_buffer(:),top_snd_buffer(:),top_rcv_buffer(:)
 
-  INTEGER      :: chunk,depth,field_type
+    REAL(KIND=8) :: left_top_snd_buffer(:),left_top_rcv_buffer(:),right_top_snd_buffer(:),right_top_rcv_buffer(:)
+    REAL(KIND=8) :: right_bottom_snd_buffer(:),right_bottom_rcv_buffer(:),left_bottom_snd_buffer(:),left_bottom_rcv_buffer(:)
 
-  INTEGER      :: size,err,tag,j,k,x_inc,y_inc,index
-  INTEGER      :: receiver,sender
-  INTEGER      :: left_neighbour_chunk, right_neighbour_chunk, bottom_neighbour_chunk, top_neighbour_chunk
-  INTEGER      :: left_top_neighbour_chunk, right_top_neighbour_chunk, right_bottom_neighbour_chunk, left_bottom_neighbour_chunk
-  INTEGER      :: leftedge, rightedge, bottomedge, topedge
+    INTEGER      :: chunk,depth,field_type
 
-  ! Field type will either be cell, vertex, x_face or y_face to get the message limits correct
-
-  ! I am packing my own buffers. I am sure this could be improved with MPI data types
-  !  but this will do for now
-
-  ! I am also sending buffers to chunks with the same task id for now.
-  ! This can be improved in the future but at the moment there is just 1 chunk per task anyway
-
-  ! The tag will be a function of the sending chunk and the face it is coming from
-  !  like chunk 6 sending the left face
-
-  ! No open mp in here either. May be beneficial will packing and unpacking in the future, though I am not sure.
-
-  ! Change this so it will allow more than 1 chunk per task
+    INTEGER      :: size,err,x_inc,y_inc
+    INTEGER      :: receiver
+    INTEGER      :: left_neighbour_chunk, right_neighbour_chunk, bottom_neighbour_chunk, top_neighbour_chunk
+    INTEGER      :: left_top_neighbour_chunk, right_top_neighbour_chunk, right_bottom_neighbour_chunk, left_bottom_neighbour_chunk
+    INTEGER      :: leftedge, rightedge, bottomedge, topedge
 
 
-  ! Pack and send
+    ! Field type will either be cell, vertex, x_face or y_face to get the message limits correct
 
-  ! These array modifications still need to be added on, plus the donor data location changes as in update_halo
-  IF(field_type.EQ.CELL_DATA) THEN
-    x_inc=0
-    y_inc=0
-  ENDIF
-  IF(field_type.EQ.VERTEX_DATA) THEN
-    x_inc=1
-    y_inc=1
-  ENDIF
-  IF(field_type.EQ.X_FACE_DATA) THEN
-    x_inc=1
-    y_inc=0
-  ENDIF
-  IF(field_type.EQ.Y_FACE_DATA) THEN
-    x_inc=0
-    y_inc=1
-  ENDIF
+    ! I am packing my own buffers. I am sure this could be improved with MPI data types
+    !  but this will do for now
+
+    ! I am also sending buffers to chunks with the same task id for now.
+    ! This can be improved in the future but at the moment there is just 1 chunk per task anyway
+
+    ! The tag will be a function of the sending chunk and the face it is coming from
+    !  like chunk 6 sending the left face
+
+    ! No open mp in here either. May be beneficial will packing and unpacking in the future, though I am not sure.
+
+    ! Change this so it will allow more than 1 chunk per task
+
+
+    ! Pack and send
 
     ! Pack real data into buffers
     IF(parallel%task.EQ.chunks(chunk)%task) THEN
@@ -763,13 +748,6 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
         size=(1+(chunks(chunk)%field%y_max+y_inc+topedge)-(chunks(chunk)%field%y_min-bottomedge))*depth
 
-        !CALL pack_left_right_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
-        !                             chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
-        !                             chunks(chunk)%chunk_neighbours(chunk_left),          &
-        !                             chunks(chunk)%chunk_neighbours(chunk_right),         &
-        !                             external_face,                                       &
-        !                             x_inc,y_inc,depth,size,                              &
-        !                             field,left_snd_buffer,right_snd_buffer)
 
         IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
             left_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left)
@@ -795,13 +773,6 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
         size=(1+(chunks(chunk)%field%x_max+x_inc+rightedge)-(chunks(chunk)%field%x_min-leftedge))*depth
 
-        !CALL pack_top_bottom_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
-        !                             chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
-        !                             chunks(chunk)%chunk_neighbours(chunk_bottom),        &
-        !                             chunks(chunk)%chunk_neighbours(chunk_top),           &
-        !                             external_face,                                       &
-        !                             x_inc,y_inc,depth,size,                              &
-        !                             field,bottom_snd_buffer,top_snd_buffer)
 
         IF(chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
             bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_bottom)
@@ -886,23 +857,6 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 #else
         sync all
 #endif
-        ! Unpack buffers in halo cells
-        !IF(parallel%task.EQ.chunks(chunk)%task) THEN
-        !    CALL unpack_left_right_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
-        !                                   chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
-        !                                   chunks(chunk)%chunk_neighbours(chunk_left),          &
-        !                                   chunks(chunk)%chunk_neighbours(chunk_right),         &
-        !                                   external_face,                                       &
-        !                                   x_inc,y_inc,depth,size,                              &
-        !                                   field,left_rcv_buffer,right_rcv_buffer)
-
-        !  CALL unpack_top_bottom_buffers(chunks(chunk)%field%x_min,chunks(chunk)%field%x_max, &
-        !                                 chunks(chunk)%field%y_min,chunks(chunk)%field%y_max, &
-        !                                 chunks(chunk)%chunk_neighbours(chunk_bottom),        &
-        !                                 chunks(chunk)%chunk_neighbours(chunk_top),           &
-        !                                 external_face,                                       &
-        !                                 x_inc,y_inc,depth,size,                              &
-        !                                 field,bottom_rcv_buffer,top_rcv_buffer)
 
     ENDIF
 
@@ -941,6 +895,41 @@ SUBROUTINE clover_min(value)
   value=minimum
 
 END SUBROUTINE clover_min
+
+SUBROUTINE clover_max(value)
+
+  IMPLICIT NONE
+
+  REAL(KIND=8) :: value
+
+  REAL(KIND=8) :: maximum
+
+  INTEGER :: err
+
+  maximum=value
+
+  !CALL MPI_ALLREDUCE(value,maximum,1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,err)
+  CALL CO_MAX(value, maximum)
+
+  value=maximum
+
+END SUBROUTINE clover_max
+
+SUBROUTINE clover_allgather(value,values)
+
+    IMPLICIT NONE
+
+    REAL(KIND=8) :: value
+
+    REAL(KIND=8) :: values(parallel%max_task)
+
+    INTEGER :: err
+
+    values(1)=value ! Just to ensure it will work in serial
+
+    totals(parallel%image)[1] = value
+
+END SUBROUTINE clover_allgather
 
 SUBROUTINE clover_check_error(error)
 
