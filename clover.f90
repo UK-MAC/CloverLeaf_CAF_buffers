@@ -707,6 +707,23 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
 
     ! Pack and send
+    ! These array modifications still need to be added on, plus the donor data location changes as in update_halo
+    IF(field_type.EQ.CELL_DATA) THEN
+      x_inc=0
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.VERTEX_DATA) THEN
+      x_inc=1
+      y_inc=1
+    ENDIF
+    IF(field_type.EQ.X_FACE_DATA) THEN
+      x_inc=1
+      y_inc=0
+    ENDIF
+    IF(field_type.EQ.Y_FACE_DATA) THEN
+      x_inc=0
+      y_inc=1
+    ENDIF
 
     ! Pack real data into buffers
     IF(parallel%task.EQ.chunks(chunk)%task) THEN
