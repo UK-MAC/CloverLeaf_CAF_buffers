@@ -38,6 +38,8 @@ SUBROUTINE start
 
   INTEGER :: fields(NUM_FIELDS)
 
+  LOGICAL :: profiler_off
+
   IF(parallel%boss)THEN
      WRITE(g_out,*) 'Setting up initial geometry'
      WRITE(g_out,*)
@@ -116,6 +118,11 @@ SUBROUTINE start
 
   CALL clover_barrier
 
+  ! Do no profile the start up costs otherwise the total times will not add up
+  ! at the end
+  profiler_off=profiler_on
+  profiler_on=.FALSE.
+
   ! Prime all halo data for the first step
   fields=0
   fields(FIELD_DENSITY0)=1
@@ -134,6 +141,7 @@ SUBROUTINE start
   END DO
 
 
+
   CALL update_halo(fields,2,.FALSE.)
 
   IF(parallel%boss)THEN
@@ -146,5 +154,7 @@ SUBROUTINE start
   IF(visit_frequency.NE.0) CALL visit()
 
   CALL clover_barrier
+
+  profiler_on=profiler_off
 
 END SUBROUTINE start
