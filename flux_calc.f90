@@ -41,7 +41,7 @@ SUBROUTINE flux_calc()
   fields(FIELD_VOL_FLUX_Y)=1
 
   IF(profiler_on) kernel_time=timer()
-  DO c=1,number_of_chunks
+  DO c=1,chunks_per_task
 
     IF(chunks(c)%task.EQ.parallel%task) THEN
 

@@ -34,7 +34,7 @@ SUBROUTINE viscosity(fields, depth, exchange)
   INTEGER :: c, fields(:), depth
   LOGICAL :: exchange
 
-  DO c=1,number_of_chunks
+  DO c=1,chunks_per_task
 
     IF(chunks(c)%task.EQ.parallel%task) THEN
 

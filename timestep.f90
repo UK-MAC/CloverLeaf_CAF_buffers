@@ -63,7 +63,7 @@ SUBROUTINE timestep()
   fields(FIELD_YVEL0)=1
 
   IF(profiler_on) kernel_time=timer()
-  DO c = 1, number_of_chunks
+  DO c = 1, chunks_per_task
     CALL ideal_gas(c,.FALSE.,fields,1,.TRUE.)
   END DO
   IF(profiler_on) profiler%ideal_gas=profiler%ideal_gas+(timer()-kernel_time)
@@ -90,7 +90,7 @@ SUBROUTINE timestep()
 
 
   IF(profiler_on) kernel_time=timer()
-  DO c = 1, number_of_chunks
+  DO c = 1, chunks_per_task
     CALL calc_dt(c,dtlp,dtl_control,xl_pos,yl_pos,jldt,kldt)
 
     IF(dtlp.LE.dt) THEN

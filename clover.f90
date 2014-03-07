@@ -153,126 +153,127 @@ SUBROUTINE clover_decompose(x_cells,y_cells,left,right,bottom,top)
 
   ! Set up chunk mesh ranges and chunk connectivity
 
-  add_x_prev=0
-  add_y_prev=0
-  chunk=1
-  DO cy=1,chunk_y
-    DO cx=1,chunk_x
-      add_x=0
-      add_y=0
-      IF(cx.LE.mod_x)add_x=1
-      IF(cy.LE.mod_y)add_y=1
-      left(chunk)=(cx-1)*delta_x+1+add_x_prev
-      right(chunk)=left(chunk)+delta_x-1+add_x
-      bottom(chunk)=(cy-1)*delta_y+1+add_y_prev
-      top(chunk)=bottom(chunk)+delta_y-1+add_y
+    add_x_prev=0
+    add_y_prev=0
+    chunk=1
+    DO cy=1,chunk_y
+        DO cx=1,chunk_x
+            add_x=0
+            add_y=0
+            IF(cx.LE.mod_x)add_x=1
+            IF(cy.LE.mod_y)add_y=1
 
-      chunks(chunk)%chunk_neighbours(chunk_left)=chunk_x*(cy-1)+cx-1
-      chunks(chunk)%chunk_neighbours(chunk_right)=chunk_x*(cy-1)+cx+1
-      chunks(chunk)%chunk_neighbours(chunk_bottom)=chunk_x*(cy-2)+cx
-      chunks(chunk)%chunk_neighbours(chunk_top)=chunk_x*(cy)+cx
+            IF (chunk .EQ. parallel%task+1) THEN
 
-      chunks(chunk)%chunk_neighbours(CHUNK_LEFT_TOP) = chunk_x*cy+cx-1
-      chunks(chunk)%chunk_neighbours(CHUNK_LEFT_BOTTOM) = chunk_x*(cy-2)+cx-1
-      chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_TOP) = chunk_x*cy+cx+1
-      chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_BOTTOM) = chunk_x*(cy-2)+cx+1
+                left(1)   = (cx-1)*delta_x+1+add_x_prev
+                right(1)  = left(1)+delta_x-1+add_x
+                bottom(1) = (cy-1)*delta_y+1+add_y_prev
+                top(1)    = bottom(1)+delta_y-1+add_y
 
-      IF(cx.EQ.1) THEN 
-        chunks(chunk)%chunk_neighbours(chunk_left)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
-      ENDIF
-      IF(cx.EQ.chunk_x) THEN 
-        chunks(chunk)%chunk_neighbours(chunk_right)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
-      ENDIF
-      IF(cy.EQ.1) THEN 
-       chunks(chunk)%chunk_neighbours(chunk_bottom)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
-      ENDIF
-      IF(cy.EQ.chunk_y) THEN 
-        chunks(chunk)%chunk_neighbours(chunk_top)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
-      ENDIF
+                chunks(1)%chunk_neighbours(chunk_left)=chunk_x*(cy-1)+cx-1
+                chunks(1)%chunk_neighbours(chunk_right)=chunk_x*(cy-1)+cx+1
+                chunks(1)%chunk_neighbours(chunk_bottom)=chunk_x*(cy-2)+cx
+                chunks(1)%chunk_neighbours(chunk_top)=chunk_x*(cy)+cx
 
+                chunks(1)%chunk_neighbours(CHUNK_LEFT_TOP) = chunk_x*cy+cx-1
+                chunks(1)%chunk_neighbours(CHUNK_LEFT_BOTTOM) = chunk_x*(cy-2)+cx-1
+                chunks(1)%chunk_neighbours(CHUNK_RIGHT_TOP) = chunk_x*cy+cx+1
+                chunks(1)%chunk_neighbours(CHUNK_RIGHT_BOTTOM) = chunk_x*(cy-2)+cx+1
 
+                IF(cx.EQ.1) THEN 
+                  chunks(1)%chunk_neighbours(chunk_left)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
+                ENDIF
+                IF(cx.EQ.chunk_x) THEN 
+                  chunks(1)%chunk_neighbours(chunk_right)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
+                ENDIF
+                IF(cy.EQ.1) THEN 
+                 chunks(1)%chunk_neighbours(chunk_bottom)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
+                ENDIF
+                IF(cy.EQ.chunk_y) THEN 
+                  chunks(1)%chunk_neighbours(chunk_top)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
+                ENDIF
 #ifdef LOCAL_SYNC
-      numNeighbours=0
-      IF (chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-          numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
-          numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      ALLOCATE(chunks(chunk)%imageNeighbours(numNeighbours))
+                numNeighbours=0
+                IF (chunks(1)%chunk_neighbours(chunk_left).NE.external_face) THEN
+                    numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_right).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_top).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
+                    numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                ALLOCATE(chunks(1)%imageNeighbours(numNeighbours))
 
-      !caf:may need to update this when multiple chunks per image so that the image is recorded correctly 
-      IF (numNeighbours > 0) THEN
-         n=1
-         IF (chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_left)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_right)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_top)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_bottom)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_left_top)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_right_top)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_right_bottom)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_left_bottom)
-            n=n+1
-         ENDIF
-      ENDIF
+                !caf:may need to update this when multiple chunks per image so that the image is recorded correctly 
+                IF (numNeighbours > 0) THEN
+                   n=1
+                   IF (chunks(1)%chunk_neighbours(chunk_left).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_left)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_right).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_right)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_top).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_top)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_bottom)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_left_top)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_right_top)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_right_bottom)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_left_bottom)
+                      n=n+1
+                   ENDIF
+                ENDIF
 #endif
 
-      IF(cx.LE.mod_x)add_x_prev=add_x_prev+1
-      chunk=chunk+1
+            ENDIF
 
+            IF(cx.LE.mod_x)add_x_prev=add_x_prev+1
+            chunk=chunk+1
+        ENDDO
+        add_x_prev=0
+        IF(cy.LE.mod_y)add_y_prev=add_y_prev+1
     ENDDO
-
-    add_x_prev=0
-    IF(cy.LE.mod_y)add_y_prev=add_y_prev+1
-  ENDDO
 
   IF(parallel%boss)THEN
     WRITE(g_out,*)
@@ -569,7 +570,7 @@ SUBROUTINE clover_exchange_send_async(depth, fields)
     IMPLICIT NONE
 
     INTEGER :: chunk, depth, fields(NUM_FIELDS), receiver 
-    chunk = parallel%task+1
+    chunk = 1
 
     IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
         !call method to write all buffers in this direction 
@@ -612,7 +613,7 @@ SUBROUTINE clover_exchange_receive_async(depth, fields)
     IMPLICIT NONE
 
     INTEGER :: chunk, depth, fields(NUM_FIELDS), receiver 
-    chunk = parallel%task+1
+    chunk = 1
 
     IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
         !unpack the buffer
@@ -665,8 +666,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 
     INTEGER :: chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), left_neighbour_chunk, x_inc, y_inc, size
     
-    left_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left)
-    receiver=chunks(left_neighbour_chunk)%task + 1
+    receiver=chunks(chunk)%chunk_neighbours(chunk_left)
 
     topedge = 0
     bottomedge = 0
@@ -691,7 +691,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%density0_right_rcv_buffer(1:size) = chunks(chunk)%density0_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_right_rcv_buffer(1:size) = chunks(chunk)%density0_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -702,7 +702,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%density1_right_rcv_buffer(1:size) = chunks(chunk)%density1_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_right_rcv_buffer(1:size) = chunks(chunk)%density1_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -712,7 +712,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%energy0_right_rcv_buffer(1:size) = chunks(chunk)%energy0_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_right_rcv_buffer(1:size) = chunks(chunk)%energy0_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -722,7 +722,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%energy1_right_rcv_buffer(1:size) = chunks(chunk)%energy1_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_right_rcv_buffer(1:size) = chunks(chunk)%energy1_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -732,7 +732,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%pressure_right_rcv_buffer(1:size) = chunks(chunk)%pressure_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_right_rcv_buffer(1:size) = chunks(chunk)%pressure_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -742,7 +742,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%viscosity_right_rcv_buffer(1:size) = chunks(chunk)%viscosity_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_right_rcv_buffer(1:size) = chunks(chunk)%viscosity_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -752,7 +752,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%soundspeed_right_rcv_buffer(1:size) = chunks(chunk)%soundspeed_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_right_rcv_buffer(1:size) = chunks(chunk)%soundspeed_left_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -767,7 +767,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%xvel0_right_rcv_buffer(1:size) = chunks(chunk)%xvel0_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_right_rcv_buffer(1:size) = chunks(chunk)%xvel0_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, VERTEX_DATA, & 
@@ -777,7 +777,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%xvel1_right_rcv_buffer(1:size) = chunks(chunk)%xvel1_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_right_rcv_buffer(1:size) = chunks(chunk)%xvel1_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, VERTEX_DATA, & 
@@ -787,7 +787,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%yvel0_right_rcv_buffer(1:size) = chunks(chunk)%yvel0_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_right_rcv_buffer(1:size) = chunks(chunk)%yvel0_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, VERTEX_DATA, & 
@@ -797,7 +797,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%yvel1_right_rcv_buffer(1:size) = chunks(chunk)%yvel1_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_right_rcv_buffer(1:size) = chunks(chunk)%yvel1_left_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -812,7 +812,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%volflux_x_right_rcv_buffer(1:size) = chunks(chunk)%volflux_x_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_right_rcv_buffer(1:size) = chunks(chunk)%volflux_x_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, X_FACE_DATA, & 
@@ -822,7 +822,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%massflux_x_right_rcv_buffer(1:size) = chunks(chunk)%massflux_x_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_right_rcv_buffer(1:size) = chunks(chunk)%massflux_x_left_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -837,7 +837,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%volflux_y_right_rcv_buffer(1:size) = chunks(chunk)%volflux_y_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_right_rcv_buffer(1:size) = chunks(chunk)%volflux_y_left_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_left(chunk, depth, receiver, topedge, bottomedge, Y_FACE_DATA, & 
@@ -847,7 +847,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_neighbour_chunk)[receiver]%massflux_y_right_rcv_buffer(1:size) = chunks(chunk)%massflux_y_left_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_right_rcv_buffer(1:size) = chunks(chunk)%massflux_y_left_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_left
@@ -858,8 +858,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 
     INTEGER :: chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), right_neighbour_chunk, x_inc, y_inc, size
 
-    right_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right)
-    receiver=chunks(right_neighbour_chunk)%task + 1
+    receiver=chunks(chunk)%chunk_neighbours(chunk_right)
 
     topedge = 0
     bottomedge = 0
@@ -883,7 +882,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%density0_left_rcv_buffer(1:size) = chunks(chunk)%density0_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_left_rcv_buffer(1:size) = chunks(chunk)%density0_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -893,7 +892,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%density1_left_rcv_buffer(1:size) = chunks(chunk)%density1_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_left_rcv_buffer(1:size) = chunks(chunk)%density1_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -903,7 +902,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%energy0_left_rcv_buffer(1:size) = chunks(chunk)%energy0_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_left_rcv_buffer(1:size) = chunks(chunk)%energy0_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -913,7 +912,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%energy1_left_rcv_buffer(1:size) = chunks(chunk)%energy1_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_left_rcv_buffer(1:size) = chunks(chunk)%energy1_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -923,7 +922,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%pressure_left_rcv_buffer(1:size) = chunks(chunk)%pressure_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_left_rcv_buffer(1:size) = chunks(chunk)%pressure_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -933,7 +932,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%viscosity_left_rcv_buffer(1:size) = chunks(chunk)%viscosity_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_left_rcv_buffer(1:size) = chunks(chunk)%viscosity_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, CELL_DATA, & 
@@ -943,7 +942,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%soundspeed_left_rcv_buffer(1:size) = chunks(chunk)%soundspeed_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_left_rcv_buffer(1:size) = chunks(chunk)%soundspeed_right_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -958,7 +957,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%xvel0_left_rcv_buffer(1:size) = chunks(chunk)%xvel0_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_left_rcv_buffer(1:size) = chunks(chunk)%xvel0_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, VERTEX_DATA, & 
@@ -968,7 +967,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%xvel1_left_rcv_buffer(1:size) = chunks(chunk)%xvel1_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_left_rcv_buffer(1:size) = chunks(chunk)%xvel1_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, VERTEX_DATA, & 
@@ -978,7 +977,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%yvel0_left_rcv_buffer(1:size) = chunks(chunk)%yvel0_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_left_rcv_buffer(1:size) = chunks(chunk)%yvel0_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, VERTEX_DATA, & 
@@ -988,7 +987,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%yvel1_left_rcv_buffer(1:size) = chunks(chunk)%yvel1_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_left_rcv_buffer(1:size) = chunks(chunk)%yvel1_right_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1003,7 +1002,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%volflux_x_left_rcv_buffer(1:size) = chunks(chunk)%volflux_x_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_left_rcv_buffer(1:size) = chunks(chunk)%volflux_x_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, X_FACE_DATA, & 
@@ -1013,7 +1012,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%massflux_x_left_rcv_buffer(1:size) = chunks(chunk)%massflux_x_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_left_rcv_buffer(1:size) = chunks(chunk)%massflux_x_right_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -1027,7 +1026,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%volflux_y_left_rcv_buffer(1:size) = chunks(chunk)%volflux_y_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_left_rcv_buffer(1:size) = chunks(chunk)%volflux_y_right_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_right(chunk, depth, receiver, topedge, bottomedge, Y_FACE_DATA, & 
@@ -1037,7 +1036,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_neighbour_chunk)[receiver]%massflux_y_left_rcv_buffer(1:size) = chunks(chunk)%massflux_y_right_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_left_rcv_buffer(1:size) = chunks(chunk)%massflux_y_right_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_right
@@ -1048,8 +1047,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 
     INTEGER :: chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), leftedge, rightedge, bottom_neighbour_chunk, x_inc, y_inc, size
 
-    bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_bottom)
-    receiver=chunks(bottom_neighbour_chunk)%task + 1
+    receiver=chunks(chunk)%chunk_neighbours(chunk_bottom)
 
     leftedge= 0
     rightedge= 0
@@ -1072,7 +1070,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%density0_top_rcv_buffer(1:size) = chunks(chunk)%density0_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_top_rcv_buffer(1:size) = chunks(chunk)%density0_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1082,7 +1080,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%density1_top_rcv_buffer(1:size) = chunks(chunk)%density1_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_top_rcv_buffer(1:size) = chunks(chunk)%density1_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1092,7 +1090,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%energy0_top_rcv_buffer(1:size) = chunks(chunk)%energy0_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_top_rcv_buffer(1:size) = chunks(chunk)%energy0_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1102,7 +1100,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%energy1_top_rcv_buffer(1:size) = chunks(chunk)%energy1_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_top_rcv_buffer(1:size) = chunks(chunk)%energy1_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1112,7 +1110,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%pressure_top_rcv_buffer(1:size) = chunks(chunk)%pressure_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_top_rcv_buffer(1:size) = chunks(chunk)%pressure_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1122,7 +1120,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%viscosity_top_rcv_buffer(1:size) = chunks(chunk)%viscosity_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_top_rcv_buffer(1:size) = chunks(chunk)%viscosity_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1132,7 +1130,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%soundspeed_top_rcv_buffer(1:size) = chunks(chunk)%soundspeed_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_top_rcv_buffer(1:size) = chunks(chunk)%soundspeed_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1147,7 +1145,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%xvel0_top_rcv_buffer(1:size) = chunks(chunk)%xvel0_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_top_rcv_buffer(1:size) = chunks(chunk)%xvel0_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, VERTEX_DATA, & 
@@ -1157,7 +1155,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%xvel1_top_rcv_buffer(1:size) = chunks(chunk)%xvel1_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_top_rcv_buffer(1:size) = chunks(chunk)%xvel1_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, VERTEX_DATA, & 
@@ -1167,7 +1165,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%yvel0_top_rcv_buffer(1:size) = chunks(chunk)%yvel0_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_top_rcv_buffer(1:size) = chunks(chunk)%yvel0_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, VERTEX_DATA, & 
@@ -1177,7 +1175,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%yvel1_top_rcv_buffer(1:size) = chunks(chunk)%yvel1_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_top_rcv_buffer(1:size) = chunks(chunk)%yvel1_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1192,7 +1190,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%volflux_x_top_rcv_buffer(1:size) = chunks(chunk)%volflux_x_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_top_rcv_buffer(1:size) = chunks(chunk)%volflux_x_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, X_FACE_DATA, & 
@@ -1202,7 +1200,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%massflux_x_top_rcv_buffer(1:size) = chunks(chunk)%massflux_x_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_top_rcv_buffer(1:size) = chunks(chunk)%massflux_x_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -1217,7 +1215,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%volflux_y_top_rcv_buffer(1:size) = chunks(chunk)%volflux_y_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_top_rcv_buffer(1:size) = chunks(chunk)%volflux_y_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_bottom(chunk, depth, receiver, leftedge, rightedge, Y_FACE_DATA, & 
@@ -1227,7 +1225,7 @@ SUBROUTINE clover_exchange_write_all_buffers_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(bottom_neighbour_chunk)[receiver]%massflux_y_top_rcv_buffer(1:size) = chunks(chunk)%massflux_y_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_top_rcv_buffer(1:size) = chunks(chunk)%massflux_y_bottom_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_bottom
@@ -1239,8 +1237,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 
     INTEGER :: chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), leftedge, rightedge, top_neighbour_chunk, x_inc, y_inc, size
 
-    top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_top)
-    receiver=chunks(top_neighbour_chunk)%task + 1
+    receiver=chunks(chunk)%chunk_neighbours(chunk_top)
 
     leftedge= 0
     rightedge= 0
@@ -1263,7 +1260,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%density0_bottom_rcv_buffer(1:size) = chunks(chunk)%density0_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_bottom_rcv_buffer(1:size) = chunks(chunk)%density0_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1273,7 +1270,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%density1_bottom_rcv_buffer(1:size) = chunks(chunk)%density1_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_bottom_rcv_buffer(1:size) = chunks(chunk)%density1_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1283,7 +1280,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%energy0_bottom_rcv_buffer(1:size) = chunks(chunk)%energy0_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_bottom_rcv_buffer(1:size) = chunks(chunk)%energy0_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1293,7 +1290,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%energy1_bottom_rcv_buffer(1:size) = chunks(chunk)%energy1_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_bottom_rcv_buffer(1:size) = chunks(chunk)%energy1_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1303,7 +1300,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%pressure_bottom_rcv_buffer(1:size) = chunks(chunk)%pressure_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_bottom_rcv_buffer(1:size) = chunks(chunk)%pressure_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1313,7 +1310,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%viscosity_bottom_rcv_buffer(1:size) = chunks(chunk)%viscosity_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_bottom_rcv_buffer(1:size) = chunks(chunk)%viscosity_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, CELL_DATA, & 
@@ -1323,7 +1320,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%soundspeed_bottom_rcv_buffer(1:size) = chunks(chunk)%soundspeed_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_bottom_rcv_buffer(1:size) = chunks(chunk)%soundspeed_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1338,7 +1335,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%xvel0_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel0_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel0_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, VERTEX_DATA, & 
@@ -1348,7 +1345,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%xvel1_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel1_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel1_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, VERTEX_DATA, & 
@@ -1358,7 +1355,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%yvel0_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel0_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel0_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, VERTEX_DATA, & 
@@ -1368,7 +1365,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%yvel1_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel1_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel1_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1382,7 +1379,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%volflux_x_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_x_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_x_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, X_FACE_DATA, & 
@@ -1392,7 +1389,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%massflux_x_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_x_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_x_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -1406,7 +1403,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%volflux_y_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_y_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_y_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_top(chunk, depth, receiver, leftedge, rightedge, Y_FACE_DATA, & 
@@ -1416,7 +1413,7 @@ SUBROUTINE clover_exchange_write_all_buffers_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(top_neighbour_chunk)[receiver]%massflux_y_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_y_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_y_top_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_top
@@ -1427,8 +1424,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 
     INTEGER :: size, chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), left_top_neighbour_chunk, x_inc, y_inc
 
-    left_top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left_top)
-    receiver = chunks(left_top_neighbour_chunk)%task + 1
+    receiver = chunks(chunk)%chunk_neighbours(chunk_left_top)
 
     size = depth*depth
 
@@ -1443,7 +1439,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%density0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%density0_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%density0_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1453,7 +1449,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%density1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%density1_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%density1_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1463,7 +1459,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%energy0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%energy0_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%energy0_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1473,7 +1469,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%energy1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%energy1_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%energy1_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1483,7 +1479,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%pressure_right_bottom_rcv_buffer(1:size) = chunks(chunk)%pressure_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_right_bottom_rcv_buffer(1:size) = chunks(chunk)%pressure_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1493,7 +1489,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%viscosity_right_bottom_rcv_buffer(1:size) = chunks(chunk)%viscosity_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_right_bottom_rcv_buffer(1:size) = chunks(chunk)%viscosity_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1503,7 +1499,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%soundspeed_right_bottom_rcv_buffer(1:size) = chunks(chunk)%soundspeed_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_right_bottom_rcv_buffer(1:size) = chunks(chunk)%soundspeed_left_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1516,7 +1512,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%xvel0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel0_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel0_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1526,7 +1522,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%xvel1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel1_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel1_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1536,7 +1532,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%yvel0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel0_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_right_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel0_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1546,7 +1542,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%yvel1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel1_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_right_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel1_left_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1559,7 +1555,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%volflux_x_right_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_x_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_right_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_x_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, X_FACE_DATA, & 
@@ -1569,7 +1565,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%massflux_x_right_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_x_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_right_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_x_left_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -1582,7 +1578,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%volflux_y_right_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_y_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_right_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_y_left_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_left_top(chunk, depth, receiver, size, Y_FACE_DATA, & 
@@ -1592,7 +1588,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_top_neighbour_chunk)[receiver]%massflux_y_right_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_y_left_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_right_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_y_left_top_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_left_top
@@ -1603,8 +1599,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 
     INTEGER :: size, chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), right_top_neighbour_chunk, x_inc, y_inc
 
-    right_top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right_top)
-    receiver = chunks(right_top_neighbour_chunk)%task + 1
+    receiver = chunks(chunk)%chunk_neighbours(chunk_right_top)
 
     size = depth*depth
 
@@ -1619,7 +1614,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%density0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%density0_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%density0_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1629,7 +1624,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%density1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%density1_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%density1_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1639,7 +1634,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%energy0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%energy0_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%energy0_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1649,7 +1644,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%energy1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%energy1_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%energy1_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1659,7 +1654,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%pressure_left_bottom_rcv_buffer(1:size) = chunks(chunk)%pressure_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_left_bottom_rcv_buffer(1:size) = chunks(chunk)%pressure_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1669,7 +1664,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%viscosity_left_bottom_rcv_buffer(1:size) = chunks(chunk)%viscosity_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_left_bottom_rcv_buffer(1:size) = chunks(chunk)%viscosity_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1679,7 +1674,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%soundspeed_left_bottom_rcv_buffer(1:size) = chunks(chunk)%soundspeed_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_left_bottom_rcv_buffer(1:size) = chunks(chunk)%soundspeed_right_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1692,7 +1687,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%xvel0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel0_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel0_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1702,7 +1697,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%xvel1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel1_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%xvel1_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1712,7 +1707,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%yvel0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel0_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_left_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel0_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1722,7 +1717,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%yvel1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel1_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_left_bottom_rcv_buffer(1:size) = chunks(chunk)%yvel1_right_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1735,7 +1730,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%volflux_x_left_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_x_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_left_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_x_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, X_FACE_DATA, & 
@@ -1745,7 +1740,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%massflux_x_left_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_x_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_left_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_x_right_top_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -1758,7 +1753,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%volflux_y_left_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_y_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_left_bottom_rcv_buffer(1:size) = chunks(chunk)%volflux_y_right_top_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_right_top(chunk, depth, receiver, size, Y_FACE_DATA, & 
@@ -1768,10 +1763,12 @@ SUBROUTINE clover_exchange_write_all_buffers_right_top(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_top_neighbour_chunk)[receiver]%massflux_y_left_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_y_right_top_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_left_bottom_rcv_buffer(1:size) = chunks(chunk)%massflux_y_right_top_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_right_top
+
+
 
 SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 
@@ -1779,8 +1776,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 
     INTEGER :: size, chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), right_bottom_neighbour_chunk, x_inc, y_inc
 
-    right_bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right_bottom)
-    receiver = chunks(right_bottom_neighbour_chunk)%task + 1
+    receiver = chunks(chunk)%chunk_neighbours(chunk_right_bottom)
 
     size = depth*depth
 
@@ -1795,7 +1791,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%density0_left_top_rcv_buffer(1:size) = chunks(chunk)%density0_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_left_top_rcv_buffer(1:size) = chunks(chunk)%density0_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1805,7 +1801,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%density1_left_top_rcv_buffer(1:size) = chunks(chunk)%density1_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_left_top_rcv_buffer(1:size) = chunks(chunk)%density1_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1815,7 +1811,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%energy0_left_top_rcv_buffer(1:size) = chunks(chunk)%energy0_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_left_top_rcv_buffer(1:size) = chunks(chunk)%energy0_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1825,7 +1821,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%energy1_left_top_rcv_buffer(1:size) = chunks(chunk)%energy1_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_left_top_rcv_buffer(1:size) = chunks(chunk)%energy1_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1835,7 +1831,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%pressure_left_top_rcv_buffer(1:size) = chunks(chunk)%pressure_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_left_top_rcv_buffer(1:size) = chunks(chunk)%pressure_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1845,7 +1841,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%viscosity_left_top_rcv_buffer(1:size) = chunks(chunk)%viscosity_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_left_top_rcv_buffer(1:size) = chunks(chunk)%viscosity_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1855,7 +1851,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%soundspeed_left_top_rcv_buffer(1:size) = chunks(chunk)%soundspeed_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_left_top_rcv_buffer(1:size) = chunks(chunk)%soundspeed_right_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1868,7 +1864,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%xvel0_left_top_rcv_buffer(1:size) = chunks(chunk)%xvel0_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_left_top_rcv_buffer(1:size) = chunks(chunk)%xvel0_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1878,7 +1874,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%xvel1_left_top_rcv_buffer(1:size) = chunks(chunk)%xvel1_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_left_top_rcv_buffer(1:size) = chunks(chunk)%xvel1_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1888,7 +1884,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%yvel0_left_top_rcv_buffer(1:size) = chunks(chunk)%yvel0_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_left_top_rcv_buffer(1:size) = chunks(chunk)%yvel0_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -1898,7 +1894,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%yvel1_left_top_rcv_buffer(1:size) = chunks(chunk)%yvel1_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_left_top_rcv_buffer(1:size) = chunks(chunk)%yvel1_right_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -1911,7 +1907,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%volflux_x_left_top_rcv_buffer(1:size) = chunks(chunk)%volflux_x_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_left_top_rcv_buffer(1:size) = chunks(chunk)%volflux_x_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, X_FACE_DATA, & 
@@ -1921,7 +1917,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%massflux_x_left_top_rcv_buffer(1:size) = chunks(chunk)%massflux_x_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_left_top_rcv_buffer(1:size) = chunks(chunk)%massflux_x_right_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -1934,7 +1930,7 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%volflux_y_left_top_rcv_buffer(1:size) = chunks(chunk)%volflux_y_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_left_top_rcv_buffer(1:size) = chunks(chunk)%volflux_y_right_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_right_bottom(chunk, depth, receiver, size, Y_FACE_DATA, & 
@@ -1944,10 +1940,12 @@ SUBROUTINE clover_exchange_write_all_buffers_right_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(right_bottom_neighbour_chunk)[receiver]%massflux_y_left_top_rcv_buffer(1:size) = chunks(chunk)%massflux_y_right_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_left_top_rcv_buffer(1:size) = chunks(chunk)%massflux_y_right_bottom_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_right_bottom
+
+
 
 SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 
@@ -1955,8 +1953,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 
     INTEGER :: size, chunk, depth, receiver, topedge, bottomedge, fields(NUM_FIELDS), left_bottom_neighbour_chunk, x_inc, y_inc
 
-    left_bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left_bottom)
-    receiver = chunks(left_bottom_neighbour_chunk)%task + 1
+    receiver = chunks(chunk)%chunk_neighbours(chunk_left_bottom)
 
     x_inc=0
     y_inc=0
@@ -1970,7 +1967,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%density0_right_top_rcv_buffer(1:size) = chunks(chunk)%density0_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density0_right_top_rcv_buffer(1:size) = chunks(chunk)%density0_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_DENSITY1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1980,7 +1977,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%density1_right_top_rcv_buffer(1:size) = chunks(chunk)%density1_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%density1_right_top_rcv_buffer(1:size) = chunks(chunk)%density1_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY0).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -1990,7 +1987,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%energy0_right_top_rcv_buffer(1:size) = chunks(chunk)%energy0_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy0_right_top_rcv_buffer(1:size) = chunks(chunk)%energy0_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_ENERGY1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -2000,7 +1997,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%energy1_right_top_rcv_buffer(1:size) = chunks(chunk)%energy1_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%energy1_right_top_rcv_buffer(1:size) = chunks(chunk)%energy1_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_PRESSURE).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -2010,7 +2007,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%pressure_right_top_rcv_buffer(1:size) = chunks(chunk)%pressure_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%pressure_right_top_rcv_buffer(1:size) = chunks(chunk)%pressure_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_VISCOSITY).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -2020,7 +2017,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%viscosity_right_top_rcv_buffer(1:size) = chunks(chunk)%viscosity_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%viscosity_right_top_rcv_buffer(1:size) = chunks(chunk)%viscosity_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, CELL_DATA, & 
@@ -2030,7 +2027,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%soundspeed_right_top_rcv_buffer(1:size) = chunks(chunk)%soundspeed_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%soundspeed_right_top_rcv_buffer(1:size) = chunks(chunk)%soundspeed_left_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -2043,7 +2040,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%xvel0_right_top_rcv_buffer(1:size) = chunks(chunk)%xvel0_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel0_right_top_rcv_buffer(1:size) = chunks(chunk)%xvel0_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_XVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -2053,7 +2050,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%xvel1_right_top_rcv_buffer(1:size) = chunks(chunk)%xvel1_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%xvel1_right_top_rcv_buffer(1:size) = chunks(chunk)%xvel1_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL0).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -2063,7 +2060,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%yvel0_right_top_rcv_buffer(1:size) = chunks(chunk)%yvel0_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel0_right_top_rcv_buffer(1:size) = chunks(chunk)%yvel0_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_YVEL1).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, VERTEX_DATA, & 
@@ -2073,7 +2070,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%yvel1_right_top_rcv_buffer(1:size) = chunks(chunk)%yvel1_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%yvel1_right_top_rcv_buffer(1:size) = chunks(chunk)%yvel1_left_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=1
@@ -2086,7 +2083,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%volflux_x_right_top_rcv_buffer(1:size) = chunks(chunk)%volflux_x_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_x_right_top_rcv_buffer(1:size) = chunks(chunk)%volflux_x_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, X_FACE_DATA, & 
@@ -2096,7 +2093,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%massflux_x_right_top_rcv_buffer(1:size) = chunks(chunk)%massflux_x_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_x_right_top_rcv_buffer(1:size) = chunks(chunk)%massflux_x_left_bottom_snd_buffer(1:size)
     ENDIF
 
     x_inc=0
@@ -2109,7 +2106,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%volflux_y_right_top_rcv_buffer(1:size) = chunks(chunk)%volflux_y_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%volflux_y_right_top_rcv_buffer(1:size) = chunks(chunk)%volflux_y_left_bottom_snd_buffer(1:size)
     ENDIF
     IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
         !CALL clover_exchange_write_message_left_bottom(chunk, depth, receiver, size, Y_FACE_DATA, & 
@@ -2119,7 +2116,7 @@ SUBROUTINE clover_exchange_write_all_buffers_left_bottom(chunk, depth, fields)
 #ifdef DEF_SYNC
         !dir$ pgas defer_sync        
 #endif
-        chunks(left_bottom_neighbour_chunk)[receiver]%massflux_y_right_top_rcv_buffer(1:size) = chunks(chunk)%massflux_y_left_bottom_snd_buffer(1:size)
+        chunks(chunk)[receiver]%massflux_y_right_top_rcv_buffer(1:size) = chunks(chunk)%massflux_y_left_bottom_snd_buffer(1:size)
     ENDIF
 
 END SUBROUTINE clover_exchange_write_all_buffers_left_bottom
