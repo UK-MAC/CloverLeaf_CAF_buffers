@@ -153,126 +153,127 @@ SUBROUTINE clover_decompose(x_cells,y_cells,left,right,bottom,top)
 
   ! Set up chunk mesh ranges and chunk connectivity
 
-  add_x_prev=0
-  add_y_prev=0
-  chunk=1
-  DO cy=1,chunk_y
-    DO cx=1,chunk_x
-      add_x=0
-      add_y=0
-      IF(cx.LE.mod_x)add_x=1
-      IF(cy.LE.mod_y)add_y=1
-      left(chunk)=(cx-1)*delta_x+1+add_x_prev
-      right(chunk)=left(chunk)+delta_x-1+add_x
-      bottom(chunk)=(cy-1)*delta_y+1+add_y_prev
-      top(chunk)=bottom(chunk)+delta_y-1+add_y
+    add_x_prev=0
+    add_y_prev=0
+    chunk=1
+    DO cy=1,chunk_y
+        DO cx=1,chunk_x
+            add_x=0
+            add_y=0
+            IF(cx.LE.mod_x)add_x=1
+            IF(cy.LE.mod_y)add_y=1
 
-      chunks(chunk)%chunk_neighbours(chunk_left)=chunk_x*(cy-1)+cx-1
-      chunks(chunk)%chunk_neighbours(chunk_right)=chunk_x*(cy-1)+cx+1
-      chunks(chunk)%chunk_neighbours(chunk_bottom)=chunk_x*(cy-2)+cx
-      chunks(chunk)%chunk_neighbours(chunk_top)=chunk_x*(cy)+cx
+            IF (chunk .EQ. parallel%task+1) THEN
 
-      chunks(chunk)%chunk_neighbours(CHUNK_LEFT_TOP) = chunk_x*cy+cx-1
-      chunks(chunk)%chunk_neighbours(CHUNK_LEFT_BOTTOM) = chunk_x*(cy-2)+cx-1
-      chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_TOP) = chunk_x*cy+cx+1
-      chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_BOTTOM) = chunk_x*(cy-2)+cx+1
+                left(1)   = (cx-1)*delta_x+1+add_x_prev
+                right(1)  = left(1)+delta_x-1+add_x
+                bottom(1) = (cy-1)*delta_y+1+add_y_prev
+                top(1)    = bottom(1)+delta_y-1+add_y
 
-      IF(cx.EQ.1) THEN 
-        chunks(chunk)%chunk_neighbours(chunk_left)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
-      ENDIF
-      IF(cx.EQ.chunk_x) THEN 
-        chunks(chunk)%chunk_neighbours(chunk_right)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
-      ENDIF
-      IF(cy.EQ.1) THEN 
-       chunks(chunk)%chunk_neighbours(chunk_bottom)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
-      ENDIF
-      IF(cy.EQ.chunk_y) THEN 
-        chunks(chunk)%chunk_neighbours(chunk_top)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
-        chunks(chunk)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
-      ENDIF
+                chunks(1)%chunk_neighbours(chunk_left)=chunk_x*(cy-1)+cx-1
+                chunks(1)%chunk_neighbours(chunk_right)=chunk_x*(cy-1)+cx+1
+                chunks(1)%chunk_neighbours(chunk_bottom)=chunk_x*(cy-2)+cx
+                chunks(1)%chunk_neighbours(chunk_top)=chunk_x*(cy)+cx
 
+                chunks(1)%chunk_neighbours(CHUNK_LEFT_TOP) = chunk_x*cy+cx-1
+                chunks(1)%chunk_neighbours(CHUNK_LEFT_BOTTOM) = chunk_x*(cy-2)+cx-1
+                chunks(1)%chunk_neighbours(CHUNK_RIGHT_TOP) = chunk_x*cy+cx+1
+                chunks(1)%chunk_neighbours(CHUNK_RIGHT_BOTTOM) = chunk_x*(cy-2)+cx+1
 
+                IF(cx.EQ.1) THEN 
+                  chunks(1)%chunk_neighbours(chunk_left)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
+                ENDIF
+                IF(cx.EQ.chunk_x) THEN 
+                  chunks(1)%chunk_neighbours(chunk_right)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
+                ENDIF
+                IF(cy.EQ.1) THEN 
+                 chunks(1)%chunk_neighbours(chunk_bottom)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_BOTTOM)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_BOTTOM)=external_face
+                ENDIF
+                IF(cy.EQ.chunk_y) THEN 
+                  chunks(1)%chunk_neighbours(chunk_top)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_LEFT_TOP)=external_face
+                  chunks(1)%chunk_neighbours(CHUNK_RIGHT_TOP)=external_face
+                ENDIF
 #ifdef LOCAL_SYNC
-      numNeighbours=0
-      IF (chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-          numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
-          numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      IF (chunks(chunk)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
-         numNeighbours = numNeighbours +1
-      ENDIF
-      ALLOCATE(chunks(chunk)%imageNeighbours(numNeighbours))
+                numNeighbours=0
+                IF (chunks(1)%chunk_neighbours(chunk_left).NE.external_face) THEN
+                    numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_right).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_top).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
+                    numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                IF (chunks(1)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
+                   numNeighbours = numNeighbours +1
+                ENDIF
+                ALLOCATE(chunks(1)%imageNeighbours(numNeighbours))
 
-      !caf:may need to update this when multiple chunks per image so that the image is recorded correctly 
-      IF (numNeighbours > 0) THEN
-         n=1
-         IF (chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_left)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_right)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_top)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_bottom)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_left_top)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_right_top)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_right_bottom)
-            n=n+1
-         ENDIF
-         IF (chunks(chunk)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
-            chunks(chunk)%imageNeighbours(n) = chunks(chunk)%chunk_neighbours(chunk_left_bottom)
-            n=n+1
-         ENDIF
-      ENDIF
+                !caf:may need to update this when multiple chunks per image so that the image is recorded correctly 
+                IF (numNeighbours > 0) THEN
+                   n=1
+                   IF (chunks(1)%chunk_neighbours(chunk_left).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_left)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_right).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_right)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_top).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_top)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_bottom)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_left_top).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_left_top)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_right_top).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_right_top)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_right_bottom).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_right_bottom)
+                      n=n+1
+                   ENDIF
+                   IF (chunks(1)%chunk_neighbours(chunk_left_bottom).NE.external_face) THEN
+                      chunks(1)%imageNeighbours(n) = chunks(1)%chunk_neighbours(chunk_left_bottom)
+                      n=n+1
+                   ENDIF
+                ENDIF
 #endif
 
-      IF(cx.LE.mod_x)add_x_prev=add_x_prev+1
-      chunk=chunk+1
+            ENDIF
 
+            IF(cx.LE.mod_x)add_x_prev=add_x_prev+1
+            chunk=chunk+1
+        ENDDO
+        add_x_prev=0
+        IF(cy.LE.mod_y)add_y_prev=add_y_prev+1
     ENDDO
-
-    add_x_prev=0
-    IF(cy.LE.mod_y)add_y_prev=add_y_prev+1
-  ENDDO
 
   IF(parallel%boss)THEN
     WRITE(g_out,*)
@@ -327,323 +328,325 @@ SUBROUTINE clover_exchange(fields,depth)
 
   IMPLICIT NONE
 
-  INTEGER      :: fields(:),depth
+  INTEGER      :: fields(:),depth,location_of_tasks_chunk
 
   ! Assuming 1 patch per task, this will be changed
   ! Also, not packing all fields for each communication, doing one at a time
 
+    location_of_tasks_chunk = 1
+
   IF(fields(FIELD_DENSITY0).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%density0,      &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%density0,      &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_DENSITY1).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%density1,      &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%density1,      &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_ENERGY0).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%energy0,       &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%energy0,       &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_ENERGY1).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%energy1,       &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%energy1,       &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_PRESSURE).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%pressure,      &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%pressure,      &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_VISCOSITY).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%viscosity,     &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%viscosity,     &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_SOUNDSPEED).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%soundspeed,    &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%soundspeed,    &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,CELL_DATA)
   ENDIF
 
   IF(fields(FIELD_XVEL0).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%xvel0,         &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%xvel0,         &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,VERTEX_DATA)
   ENDIF
 
   IF(fields(FIELD_XVEL1).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%xvel1,         &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%xvel1,         &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,VERTEX_DATA)
   ENDIF
 
   IF(fields(FIELD_YVEL0).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%yvel0,         &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%yvel0,         &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,VERTEX_DATA)
   ENDIF
 
   IF(fields(FIELD_YVEL1).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%yvel1,         &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%yvel1,         &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,VERTEX_DATA)
   ENDIF
 
   IF(fields(FIELD_VOL_FLUX_X).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%vol_flux_x,    &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%vol_flux_x,    &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,X_FACE_DATA)
   ENDIF
 
   IF(fields(FIELD_VOL_FLUX_Y).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%vol_flux_y,    &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%vol_flux_y,    &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,Y_FACE_DATA)
   ENDIF
 
   IF(fields(FIELD_MASS_FLUX_X).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%mass_flux_x,   &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%mass_flux_x,   &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,X_FACE_DATA)
   ENDIF
 
   IF(fields(FIELD_MASS_FLUX_Y).EQ.1) THEN
-    CALL clover_exchange_message(parallel%task+1,chunks(parallel%task+1)%field%mass_flux_y,   &
-                                 chunks(parallel%task+1)%left_snd_buffer,                      &
-                                 chunks(parallel%task+1)%left_rcv_buffer,                      &
-                                 chunks(parallel%task+1)%right_snd_buffer,                     &
-                                 chunks(parallel%task+1)%right_rcv_buffer,                     &
-                                 chunks(parallel%task+1)%bottom_snd_buffer,                    &
-                                 chunks(parallel%task+1)%bottom_rcv_buffer,                    &
-                                 chunks(parallel%task+1)%top_snd_buffer,                       &
-                                 chunks(parallel%task+1)%top_rcv_buffer,                       &
-                                 chunks(parallel%task+1)%left_top_snd_buffer,                  &
-                                 chunks(parallel%task+1)%left_top_rcv_buffer,                  &
-                                 chunks(parallel%task+1)%right_top_snd_buffer,                 &
-                                 chunks(parallel%task+1)%right_top_rcv_buffer,                 &
-                                 chunks(parallel%task+1)%right_bottom_snd_buffer,              &
-                                 chunks(parallel%task+1)%right_bottom_rcv_buffer,              &
-                                 chunks(parallel%task+1)%left_bottom_snd_buffer,               &
-                                 chunks(parallel%task+1)%left_bottom_rcv_buffer,               &
+    CALL clover_exchange_message(location_of_tasks_chunk,chunks(location_of_tasks_chunk)%field%mass_flux_y,   &
+                                 chunks(location_of_tasks_chunk)%left_snd_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%left_rcv_buffer,                      &
+                                 chunks(location_of_tasks_chunk)%right_snd_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%right_rcv_buffer,                     &
+                                 chunks(location_of_tasks_chunk)%bottom_snd_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%bottom_rcv_buffer,                    &
+                                 chunks(location_of_tasks_chunk)%top_snd_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%top_rcv_buffer,                       &
+                                 chunks(location_of_tasks_chunk)%left_top_snd_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%left_top_rcv_buffer,                  &
+                                 chunks(location_of_tasks_chunk)%right_top_snd_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_top_rcv_buffer,                 &
+                                 chunks(location_of_tasks_chunk)%right_bottom_snd_buffer,              &
+                                 chunks(location_of_tasks_chunk)%right_bottom_rcv_buffer,              &
+                                 chunks(location_of_tasks_chunk)%left_bottom_snd_buffer,               &
+                                 chunks(location_of_tasks_chunk)%left_bottom_rcv_buffer,               &
                                  depth,Y_FACE_DATA)
   ENDIF
 
@@ -767,15 +770,13 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
 
         IF(chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) THEN
-            left_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left)
-            receiver=chunks(left_neighbour_chunk)%task
-            chunks(left_neighbour_chunk)[receiver+1]%right_rcv_buffer(1:size) = left_snd_buffer(1:size)
+            receiver=chunks(chunk)%chunk_neighbours(chunk_left)
+            chunks(chunk)[receiver]%right_rcv_buffer(1:size) = left_snd_buffer(1:size)
         ENDIF
 
         IF(chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) THEN
-            right_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right)
-            receiver = chunks(right_neighbour_chunk)%task
-            chunks(right_neighbour_chunk)[receiver+1]%left_rcv_buffer(1:size) = right_snd_buffer(1:size)
+            receiver = chunks(chunk)%chunk_neighbours(chunk_right)
+            chunks(chunk)[receiver]%left_rcv_buffer(1:size) = right_snd_buffer(1:size)
         ENDIF
 
 
@@ -792,15 +793,13 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
 
 
         IF(chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) THEN
-            bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_bottom)
-            receiver=chunks(bottom_neighbour_chunk)%task
-            chunks(bottom_neighbour_chunk)[receiver+1]%top_rcv_buffer(1:size) = bottom_snd_buffer(1:size)
+            receiver=chunks(chunk)%chunk_neighbours(chunk_bottom)
+            chunks(chunk)[receiver]%top_rcv_buffer(1:size) = bottom_snd_buffer(1:size)
         ENDIF
 
         IF(chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) THEN
-            top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_top)
-            receiver=chunks(top_neighbour_chunk)%task
-            chunks(top_neighbour_chunk)[receiver+1]%bottom_rcv_buffer(1:size) = top_snd_buffer(1:size)
+            receiver=chunks(chunk)%chunk_neighbours(chunk_top)
+            chunks(chunk)[receiver]%bottom_rcv_buffer(1:size) = top_snd_buffer(1:size)
         ENDIF
 
 
@@ -808,28 +807,24 @@ SUBROUTINE clover_exchange_message(chunk,field,                            &
         size = depth*depth
 
         IF ( (chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) .AND. (chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) ) THEN
-            left_top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left_top)
-            receiver = chunks(left_top_neighbour_chunk)%task + 1
-            chunks(left_top_neighbour_chunk)[receiver]%right_bottom_rcv_buffer(1:size) = left_top_snd_buffer(1:size)
+            receiver = chunks(chunk)%chunk_neighbours(chunk_left_top)
+            chunks(chunk)[receiver]%right_bottom_rcv_buffer(1:size) = left_top_snd_buffer(1:size)
         ENDIF
 
         IF ( (chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) .AND. (chunks(chunk)%chunk_neighbours(chunk_top).NE.external_face) ) THEN
-            right_top_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right_top)
-            receiver = chunks(right_top_neighbour_chunk)%task + 1
-            chunks(right_top_neighbour_chunk)[receiver]%left_bottom_rcv_buffer(1:size) = right_top_snd_buffer(1:size)
+            receiver = chunks(chunk)%chunk_neighbours(chunk_right_top)
+            chunks(chunk)[receiver]%left_bottom_rcv_buffer(1:size) = right_top_snd_buffer(1:size)
         ENDIF
 
 
         IF ( (chunks(chunk)%chunk_neighbours(chunk_right).NE.external_face) .AND. (chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) ) THEN
-            right_bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_right_bottom)
-            receiver = chunks(right_bottom_neighbour_chunk)%task + 1
-            chunks(right_bottom_neighbour_chunk)[receiver]%left_top_rcv_buffer(1:size) = right_bottom_snd_buffer(1:size)
+            receiver = chunks(chunk)%chunk_neighbours(chunk_right_bottom)
+            chunks(chunk)[receiver]%left_top_rcv_buffer(1:size) = right_bottom_snd_buffer(1:size)
         ENDIF
 
         IF ( (chunks(chunk)%chunk_neighbours(chunk_left).NE.external_face) .AND. (chunks(chunk)%chunk_neighbours(chunk_bottom).NE.external_face) ) THEN
-            left_bottom_neighbour_chunk = chunks(chunk)%chunk_neighbours(chunk_left_bottom)
-            receiver = chunks(left_bottom_neighbour_chunk)%task + 1
-            chunks(left_bottom_neighbour_chunk)[receiver]%right_top_rcv_buffer(1:size) = left_bottom_snd_buffer(1:size)
+            receiver = chunks(chunk)%chunk_neighbours(chunk_left_bottom)
+            chunks(chunk)[receiver]%right_top_rcv_buffer(1:size) = left_bottom_snd_buffer(1:size)
         ENDIF
 
 
