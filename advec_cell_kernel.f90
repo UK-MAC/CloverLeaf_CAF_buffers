@@ -116,7 +116,7 @@ SUBROUTINE advec_cell_kernel(x_min,       &
                              density1, energy1, vol_flux_x, mass_flux_x, pre_vol, pre_mass, post_mass, advec_vol, post_ener, ener_flux)
 
 #ifdef LOCAL_SYNC
-        sync images( chunks(parallel%task+1)%imageNeighbours )
+        sync images( chunks(1)%imageNeighbours )
 #else
         sync all
 #endif
@@ -162,7 +162,7 @@ SUBROUTINE advec_cell_kernel(x_min,       &
                              density1, energy1, vol_flux_y, mass_flux_y, pre_vol, post_vol, pre_mass, post_mass, advec_vol, post_ener, ener_flux)
 
 #ifdef LOCAL_SYNC
-        sync images( chunks(parallel%task+1)%imageNeighbours )
+        sync images( chunks(1)%imageNeighbours )
 #else
         sync all
 #endif

@@ -64,7 +64,7 @@ SUBROUTINE viscosity_kernel(x_min,x_max,y_min,y_max,    &
         CALL viscosity_kernel_real(x_min+depth,x_max-depth,y_min+depth,y_max-depth,x_min,x_max,y_min,y_max,viscosity,xvel0,yvel0,celldx,celldy,pressure,density0)
 
 #ifdef LOCAL_SYNC
-        sync images( chunks(parallel%task+1)%imageNeighbours )
+        sync images( chunks(1)%imageNeighbours )
 #else
         sync all
 #endif

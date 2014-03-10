@@ -73,7 +73,7 @@ SUBROUTINE flux_calc_kernel(x_min,x_max,y_min,y_max,dt,              &
     CALL real_vol_flux_y(x_min+depth, x_max-depth, y_min+depth, y_max-depth, x_min, x_max, y_min, y_max, dt, vol_flux_y, yarea, yvel0, yvel1)
 
 #ifdef LOCAL_SYNC
-    sync images( chunks(parallel%task+1)%imageNeighbours )
+    sync images( chunks(1)%imageNeighbours )
 #else
     sync all
 #endif
